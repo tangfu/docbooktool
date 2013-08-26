@@ -1,4 +1,0 @@
-docbooktool
-===========
-
-docbooktool

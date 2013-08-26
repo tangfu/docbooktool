@@ -1,0 +1,10 @@
+【注意】
+1.加速系统中已有java,xsltproc这些基本工具
+2.tools里面安装需要的工具添加进去即可，软链接到真是工具目录
+3.config中的fop.xonf的字体文件路径需要自行设定(/usr/share/fonts/..)
+
+【用法】
+将docbooktool放到PATH下即可
+docbooktool [-t type] -f xmlfile
+type = html | htmls | htmlhelp | txt | webhelp | pdf | rtf | man
+type参数未填写时生成全部文档，文档路径在当期目录下的"$basefile-doc"目录中

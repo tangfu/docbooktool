@@ -1,0 +1,152 @@
+#!/bin/bash
+
+OUTPUT_DIR=`pwd`
+DOCBOOK_HOME=/data/home/tangfutang/personal/docbook5
+cd $DOCBOOK_HOME
+
+FOP_HOME=$DOCBOOK_HOME/tools/fop
+DOCBOOK_XSL_NS_HOME=$DOCBOOK_HOME/tools/docbook_xsl_ns
+ANT_HOME=$DOCBOOK_HOME/tools/ant
+
+PATH=$PATH:$FOP_HOME:$ANT_HOME/bin
+
+#######################################################
+
+function help()
+{
+    cat <<-END
+    USAGE:
+    docbooktool [-t type] -f sourcefile
+    type = html|htmls|htmlhelp|txt|man|webhelp|pdf|rtf
+END
+    exit 1
+}
+
+function gen_rtf() 
+{
+    mkdir -p $basedir/rtf/
+    xsltproc --xinclude -o .temp22222 $configdir/fo.xsl $sourcefile
+    fop -c $configdir/fop.xconf -fo .temp22222 -rtf $basedir/rtf/${basefile}.rtf
+    rm .temp22222
+}
+
+function gen_html()
+{
+    mkdir -p $basedir/html/
+    xsltproc -o $basedir/html/${basefile}.html $configdir/html.xsl $sourcefile
+}
+
+function gen_pdf()
+{
+    mkdir -p $basedir/pdf/
+    xsltproc --xinclude -o .temp22222 $configdir/fo.xsl $sourcefile
+    fop -c $configdir/fop.xconf -fo .temp22222 -pdf $basedir/pdf/${basefile}.pdf
+    rm .temp22222
+}
+
+function gen_man()
+{
+    mkdir -p $basedir/man/
+    xsltproc -o $basedir/man/${basefile}.man $configdir/man.xsl $sourcefile
+}
+
+function gen_webhelp() 
+{
+    mkdir -p $basedir/webhelp/
+    ant -f $configdir/webhelp.xsl -Dinput-xml=$sourcefile -Doutput-dir=$basedir/webhelp/ webhelp
+}
+
+function gen_txt()
+{
+    mkdir -p $basedir/txt/
+    xsltproc -o .temp11111 $configdir/html.xsl $sourcefile
+    mkdir -p $basedir/txt
+    w3m -dump .temp11111 > $basedir/txt/${basefile}.txt
+    rm .temp11111
+}
+
+function gen_htmlhelp()
+{
+    mkdir -p $basedir/htmlhelp
+    xsltproc -o $basedir/htmlhelp/ $configdir/htmlhelp.xsl $sourcefile
+}
+
+function gen_htmls()
+{
+    mkdir -p $basedir/htmls/
+    xsltproc -o $basedir/htmls/ $configdir/htmls.xsl $sourcefile
+}
+
+#############################################################
+
+while getopts ":t:f:" arg
+do
+    case $arg in
+        t)
+        totype=$OPTARG
+        ;;
+        f)
+        [ ${OPTARG:0:1} != "/" ] && OPTARG=$OUTPUT_DIR/$OPTARG
+        if [ -f $OPTARG ];then
+            sourcefile=$OPTARG
+            echo $sourcefile
+            temp=${sourcefile##*/}
+            basefile=${temp%.*}
+            basedir=$OUTPUT_DIR/${basefile}-doc
+            configdir=$DOCBOOK_HOME/config
+        fi
+        echo "source=$sourcefile"
+        ;;
+        ?)
+        echo "unknown opt"
+        exit 2
+        ;;
+        *)
+        help
+        ;;
+    esac
+done
+
+[ -z $sourcefile ] && help
+[ -z $totype ] && totype=all
+
+
+case $totype in
+    html)
+    gen_html
+    ;;
+    htmls)
+    gen_htmls
+    ;;
+    htmlhelp)
+    gen_htmlhelp
+    ;;
+    txt)
+    gen_txt
+    ;;
+    webhelp)
+    gen_webhelp
+    ;;
+    man)
+    gen_man
+    ;;
+    pdf)
+    gen_pdf
+    ;;
+    rtf)
+    gen_rtf
+    ;;
+    all)
+    gen_html
+    gen_htmls
+    gen_htmlhelp
+    gen_txt
+    gen_webhelp
+    gen_man
+    gen_pdf
+    gen_rtf
+    ;;
+    *)
+    help
+    ;;
+esac
