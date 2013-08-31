@@ -30,4 +30,13 @@ misc setting
 <!-- no indent for body content -->
 <xsl:param name="body.start.indent">0pt</xsl:param>
 
+<!-- no link show -->
+<xsl:param name="ulink.show" select="0"/>
+
+<xsl:attribute-set name="xref.properties">
+  <xsl:attribute name="color">blue</xsl:attribute>
+<!-- http://www.w3schools.com/cssref/pr_text_text-decoration.asp: overline/line-through/underline -->
+  <xsl:attribute name="text-decoration">underline</xsl:attribute>
+</xsl:attribute-set>
+
 </xsl:stylesheet>
